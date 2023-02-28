@@ -111,7 +111,7 @@ spec:
           name: tmp-volume
         securityContext:
           allowPrivilegeEscalation: false
-          privileged: false
+          privileged: true
           capabilities:
             drop: ["ALL"]
       volumes:
@@ -618,7 +618,7 @@ spec:
         - mountPath: /tmp
           name: tmp-volume
         securityContext:
-          allowPrivilegeEscalation: false
+          allowPrivilegeEscalation: true
           privileged: false
           capabilities:
             drop: ["ALL"]
