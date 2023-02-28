@@ -511,7 +511,7 @@ spec:
         ports:
         - containerPort: 80
         securityContext:
-          allowPrivilegeEscalation: false
+          allowPrivilegeEscalation: true
           privileged: false
           capabilities:
             drop: ["ALL"]
