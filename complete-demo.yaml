@@ -208,7 +208,7 @@ spec:
         name: catalogue
     spec:
       securityContext:
-        runAsUser: 0
+        runAsUser: 1000840000
         runAsNonRoot: true
         seccompProfile:
           type: "RuntimeDefault"
