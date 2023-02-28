@@ -113,7 +113,7 @@ spec:
         - mountPath: /tmp
           name: tmp-volume
         securityContext:
-          allowPrivilegeEscalation: true
+          allowPrivilegeEscalation: false
           privileged: false
           capabilities:
             drop: ["ALL"]
@@ -229,7 +229,7 @@ spec:
         ports:
         - containerPort: 80
         securityContext:
-          allowPrivilegeEscalation: true
+          allowPrivilegeEscalation: false
           privileged: false
           capabilities:
             drop: ["ALL"]
@@ -413,7 +413,7 @@ spec:
         - mountPath: /tmp
           name: tmp-volume
         securityContext:
-          allowPrivilegeEscalation: true
+          allowPrivilegeEscalation: false
           privileged: false
           capabilities:
             drop: ["ALL"]
@@ -467,7 +467,7 @@ spec:
         ports:
         - containerPort: 80
         securityContext:
-          allowPrivilegeEscalation: true
+          allowPrivilegeEscalation: false
           privileged: false
           capabilities:
             drop: ["ALL"]
@@ -514,7 +514,7 @@ spec:
         ports:
         - containerPort: 80
         securityContext:
-          allowPrivilegeEscalation: true
+          allowPrivilegeEscalation: false
           privileged: false
           capabilities:
             drop: ["ALL"]
@@ -621,7 +621,7 @@ spec:
         - mountPath: /tmp
           name: tmp-volume
         securityContext:
-          allowPrivilegeEscalation: true
+          allowPrivilegeEscalation: false
           privileged: false
           capabilities:
             drop: ["ALL"]
@@ -750,7 +750,7 @@ spec:
         - name: ZIPKIN
           value: http://zipkin:9411/api/v1/spans
         securityContext:
-          allowPrivilegeEscalation: true
+          allowPrivilegeEscalation: false
           privileged: false
           capabilities:
             drop: ["ALL"]
