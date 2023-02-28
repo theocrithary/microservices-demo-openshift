@@ -5,7 +5,7 @@ metadata:
   name: sock-shop
   labels:
     pod-security.kubernetes.io/enforce: privileged
-    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/warn: privileged
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -38,6 +38,11 @@ spec:
           value: data
         - name: MONGODB_ADMIN_PASSWORD
           value: admin
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop: ["ALL"]
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
