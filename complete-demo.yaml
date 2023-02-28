@@ -78,6 +78,10 @@ spec:
       labels:
         name: carts
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: "RuntimeDefault"
       containers:
       - name: carts
         image: weaveworksdemos/carts:0.4.8
@@ -99,6 +103,11 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop: ["ALL"]
       volumes:
         - name: tmp-volume
           emptyDir:
@@ -197,6 +206,10 @@ spec:
       labels:
         name: catalogue
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: "RuntimeDefault"
       containers:
       - name: catalogue
         image: mosuke5/sockshop-catalogue:a04de03
@@ -206,6 +219,11 @@ spec:
         #  value: http://zipkin:9411/api/v1/spans
         ports:
         - containerPort: 80
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop: ["ALL"]
       nodeSelector:
         kubernetes.io/os: linux
 ---
@@ -238,11 +256,20 @@ spec:
         name: front-end
         version: v1
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: "RuntimeDefault"
       containers:
       - name: front-end
         image: mosuke5/front-end:master-7ad6254
         ports:
         - containerPort: 8079
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop: ["ALL"]
       nodeSelector:
         kubernetes.io/os: linux
 ---
@@ -293,6 +320,10 @@ spec:
       labels:
         name: orders-db
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: "RuntimeDefault"
       containers:
       - name: orders-db
         image: centos/mongodb-34-centos7
@@ -311,6 +342,11 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop: ["ALL"]
       volumes:
         - name: tmp-volume
           emptyDir:
@@ -348,6 +384,10 @@ spec:
       labels:
         name: orders
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: "RuntimeDefault"
       containers:
       - name: orders
         image: weaveworksdemos/orders:0.4.7
@@ -363,6 +403,11 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop: ["ALL"]
       volumes:
         - name: tmp-volume
           emptyDir:
@@ -400,6 +445,10 @@ spec:
       labels:
         name: payment
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: "RuntimeDefault"
       containers:
       - name: payment
         image: weaveworksdemos/payment:0.4.3
@@ -408,6 +457,11 @@ spec:
           value: http://zipkin:9411/api/v1/spans
         ports:
         - containerPort: 80
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop: ["ALL"]
       nodeSelector:
         kubernetes.io/os: linux
 ---
@@ -441,11 +495,20 @@ spec:
       labels:
         name: queue-master
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: "RuntimeDefault"
       containers:
       - name: queue-master
         image: weaveworksdemos/queue-master:0.3.1
         ports:
         - containerPort: 80
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop: ["ALL"]
       nodeSelector:
         kubernetes.io/os: linux
 ---
@@ -481,11 +544,20 @@ spec:
       labels:
         name: rabbitmq
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: "RuntimeDefault"
       containers:
       - name: rabbitmq
         image: rabbitmq:3.6.8
         ports:
         - containerPort: 5672
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop: ["ALL"]
       nodeSelector:
         kubernetes.io/os: linux
 ---
@@ -522,6 +594,10 @@ spec:
       labels:
         name: shipping
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: "RuntimeDefault"
       containers:
       - name: shipping
         image: weaveworksdemos/shipping:0.4.8
@@ -535,6 +611,11 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop: ["ALL"]
       volumes:
         - name: tmp-volume
           emptyDir:
@@ -572,6 +653,10 @@ spec:
       labels:
         name: user-db
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: "RuntimeDefault"
       containers:
       - name: user-db
         image: mosuke5/sockshop-user-db@sha256:7633a123fe2a1e6191fd37cad6d4f07bfb2acdc3a634e27c226df3ae21357da0
@@ -595,6 +680,11 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop: ["ALL"]
       volumes:
         - name: tmp-volume
           emptyDir:
@@ -632,6 +722,10 @@ spec:
       labels:
         name: user
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: "RuntimeDefault"
       containers:
       - name: user
         image: weaveworksdemos/user:0.4.7
@@ -646,6 +740,11 @@ spec:
           value: user-db:27017
         - name: ZIPKIN
           value: http://zipkin:9411/api/v1/spans
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop: ["ALL"]
       nodeSelector:
         kubernetes.io/os: linux
 ---
