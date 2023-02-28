@@ -38,11 +38,6 @@ spec:
           value: data
         - name: MONGODB_ADMIN_PASSWORD
           value: admin
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
-          capabilities:
-            drop: ["ALL"]
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
@@ -160,6 +155,11 @@ spec:
         ports:
         - name: mysql
           containerPort: 3306
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop: ["ALL"]
       nodeSelector:
         kubernetes.io/os: linux
 ---
