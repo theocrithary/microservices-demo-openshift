@@ -747,7 +747,7 @@ spec:
         - name: ZIPKIN
           value: http://zipkin:9411/api/v1/spans
         securityContext:
-          allowPrivilegeEscalation: false
+          allowPrivilegeEscalation: true
           privileged: false
           capabilities:
             drop: ["ALL"]
