@@ -208,7 +208,7 @@ spec:
         name: catalogue
     spec:
       securityContext:
-        runAsNonRoot: true
+        runAsNonRoot: false
         seccompProfile:
           type: "RuntimeDefault"
       containers:
@@ -221,7 +221,7 @@ spec:
         ports:
         - containerPort: 80
         securityContext:
-          allowPrivilegeEscalation: true
+          allowPrivilegeEscalation: false
           privileged: false
           capabilities:
             drop: ["ALL"]
