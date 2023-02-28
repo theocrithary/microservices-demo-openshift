@@ -208,7 +208,7 @@ spec:
         name: catalogue
     spec:
       securityContext:
-        runAsNonRoot: false
+        runAsNonRoot: true
         seccompProfile:
           type: "RuntimeDefault"
       containers:
