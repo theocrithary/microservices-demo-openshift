@@ -222,7 +222,7 @@ spec:
         - containerPort: 80
         securityContext:
           allowPrivilegeEscalation: true
-          privileged: true
+          privileged: false
           capabilities:
             drop: ["ALL"]
       nodeSelector:
