@@ -1,3 +1,26 @@
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sock-shop
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: scc:restricted:users
+  namespace: sock-shop
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:restricted
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: system:serviceaccounts:sock-shop
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -5,6 +28,7 @@ metadata:
   name: carts-db
   labels:
     name: carts-db
+  namespace: sock-shop
 spec:
   replicas: 1
   selector:
@@ -55,6 +79,7 @@ metadata:
   name: carts-db
   labels:
     name: carts-db
+  namespace: sock-shop
 spec:
   ports:
     # the port that this service should serve on
@@ -69,6 +94,7 @@ metadata:
   name: carts
   labels:
     name: carts
+  namespace: sock-shop
 spec:
   replicas: 1
   selector:
@@ -122,6 +148,7 @@ metadata:
   name: carts
   labels:
     name: carts
+  namespace: sock-shop
 spec:
   ports:
     # the port that this service should serve on
@@ -136,6 +163,7 @@ metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
+  namespace: sock-shop
 spec:
   replicas: 1
   selector:
@@ -183,6 +211,7 @@ metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
+  namespace: sock-shop
 spec:
   ports:
     # the port that this service should serve on
@@ -197,6 +226,7 @@ metadata:
   name: catalogue
   labels:
     name: catalogue
+  namespace: sock-shop
 spec:
   replicas: 1
   selector:
@@ -234,6 +264,7 @@ metadata:
   name: catalogue
   labels:
     name: catalogue
+  namespace: sock-shop
 spec:
   ports:
     # the port that this service should serve on
@@ -246,6 +277,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: front-end
+  namespace: sock-shop
 spec:
   replicas: 1
   selector:
@@ -280,6 +312,7 @@ metadata:
   name: front-end
   labels:
     name: front-end
+  namespace: sock-shop
 spec:
   type: ClusterIP
   ports:
@@ -296,6 +329,7 @@ metadata:
   labels:
     name: front-end
   name: front-end
+  namespace: sock-shop
 spec:
   port:
     targetPort: web
@@ -311,6 +345,7 @@ metadata:
   name: orders-db
   labels:
     name: orders-db
+  namespace: sock-shop
 spec:
   replicas: 1
   selector:
@@ -361,6 +396,7 @@ metadata:
   name: orders-db
   labels:
     name: orders-db
+  namespace: sock-shop
 spec:
   ports:
     # the port that this service should serve on
@@ -375,6 +411,7 @@ metadata:
   name: orders
   labels:
     name: orders
+  namespace: sock-shop
 spec:
   replicas: 1
   selector:
@@ -422,6 +459,7 @@ metadata:
   name: orders
   labels:
     name: orders
+  namespace: sock-shop
 spec:
   ports:
     # the port that this service should serve on
@@ -436,6 +474,7 @@ metadata:
   name: payment
   labels:
     name: payment
+  namespace: sock-shop
 spec:
   replicas: 1
   selector:
@@ -472,6 +511,7 @@ metadata:
   name: payment
   labels:
     name: payment
+  namespace: sock-shop
 spec:
   ports:
     # the port that this service should serve on
@@ -486,6 +526,7 @@ metadata:
   name: queue-master
   labels:
     name: queue-master
+  namespace: sock-shop
 spec:
   replicas: 1
   selector:
@@ -521,6 +562,7 @@ metadata:
     name: queue-master
   annotations:
     prometheus.io/path: "/prometheus"
+  namespace: sock-shop
 spec:
   ports:
     # the port that this service should serve on
@@ -535,6 +577,7 @@ metadata:
   name: rabbitmq
   labels:
     name: rabbitmq
+  namespace: sock-shop
 spec:
   replicas: 1
   selector:
@@ -568,6 +611,7 @@ metadata:
   name: rabbitmq
   labels:
     name: rabbitmq
+  namespace: sock-shop
 spec:
   ports:
     # the port that this service should serve on
@@ -585,6 +629,7 @@ metadata:
   name: shipping
   labels:
     name: shipping
+  namespace: sock-shop
 spec:
   replicas: 1
   selector:
@@ -630,6 +675,7 @@ metadata:
   name: shipping
   labels:
     name: shipping
+  namespace: sock-shop
 spec:
   ports:
     # the port that this service should serve on
@@ -644,6 +690,7 @@ metadata:
   name: user-db
   labels:
     name: user-db
+  namespace: sock-shop
 spec:
   replicas: 1
   selector:
@@ -699,6 +746,7 @@ metadata:
   name: user-db
   labels:
     name: user-db
+  namespace: sock-shop
 spec:
   ports:
     # the port that this service should serve on
@@ -713,6 +761,7 @@ metadata:
   name: user
   labels:
     name: user
+  namespace: sock-shop
 spec:
   replicas: 1
   selector:
@@ -755,6 +804,7 @@ metadata:
   name: user
   labels:
     name: user
+  namespace: sock-shop
 spec:
   ports:
     # the port that this service should serve on

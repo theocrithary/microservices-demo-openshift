@@ -1,0 +1,1 @@
+oc create clusterrolebinding system:openshift:scc:restricted --clusterrole=system:openshift:scc:restricted --group=system:authenticated
