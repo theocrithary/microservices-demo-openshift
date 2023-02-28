@@ -23,6 +23,10 @@ spec:
       labels:
         name: carts-db
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: "RuntimeDefault"
       containers:
       - name: carts-db
         image: centos/mongodb-34-centos7
@@ -41,6 +45,11 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop: ["ALL"]
       volumes:
         - name: tmp-volume
           emptyDir:
