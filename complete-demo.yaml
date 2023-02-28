@@ -136,6 +136,10 @@ spec:
       labels:
         name: catalogue-db
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: "RuntimeDefault"
       containers:
       - name: catalogue-db
         image: mosuke5/sockshop-catalogue-db@sha256:e9c9192a81991ab1acf2dcc5819f0b0eb513d04e80fa21ae1b869bc5ba810c40
