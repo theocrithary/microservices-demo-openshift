@@ -7,7 +7,7 @@ metadata:
 apiVersion: v1
 kind: SecurityContextConstraints
 metadata:
-  name: socks-shop-scc
+  name: sock-shop-scc
 allowPrivilegedContainer: false
 runAsUser:
   type: RunAsAny
@@ -17,29 +17,29 @@ seLinuxContext:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: socks-shop-sa
-  namespace: socks-shop
+  name: sock-shop-sa
+  namespace: sock-shop
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: socks-shop-role
+  name: sock-shop-role
 rules:
   - apiGroups: ["security.openshift.io"]
     resources: ["securitycontextconstraints"]
-    resourceNames: ["socks-shop-scc"]
+    resourceNames: ["sock-shop-scc"]
     verbs: ["use"]
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: socks-shop-scc-rolebinding
+  name: sock-shop-scc-rolebinding
 subjects:
   - kind: ServiceAccount
-    name: socks-shop-sa
+    name: sock-shop-sa
 roleRef:
   kind: Role
-  name: socks-shop-role
+  name: sock-shop-role
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: apps/v1
