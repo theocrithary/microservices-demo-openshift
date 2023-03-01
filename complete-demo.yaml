@@ -1,26 +1,76 @@
-
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
   name: sock-shop
-  labels:
-    pod-security.kubernetes.io/enforce: restricted
-    pod-security.kubernetes.io/warn: restricted
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: scc:restricted:users
+  name: carts
+  labels:
+    name: carts
   namespace: sock-shop
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: system:openshift:scc:restricted
-subjects:
-- apiGroup: rbac.authorization.k8s.io
-  kind: Group
-  name: system:serviceaccounts:sock-shop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: carts
+  template:
+    metadata:
+      labels:
+        name: carts
+    spec:
+      containers:
+      - name: carts
+        image: weaveworksdemos/carts:0.4.8
+        env:
+         - name: JAVA_OPTS
+           value: -Xms64m -Xmx128m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom -Dspring.zipkin.enabled=false
+        resources:
+          limits:
+            cpu: 300m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        ports:
+        - containerPort: 80
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 10001
+          capabilities:
+            drop:
+              - all
+            add:
+              - NET_BIND_SERVICE
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp-volume
+      volumes:
+        - name: tmp-volume
+          emptyDir:
+            medium: Memory
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: carts
+  annotations:
+        prometheus.io/scrape: 'true'
+  labels:
+    name: carts
+  namespace: sock-shop
+spec:
+  ports:
+    # the port that this service should serve on
+  - port: 80
+    targetPort: 80
+  selector:
+    name: carts
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -39,39 +89,30 @@ spec:
       labels:
         name: carts-db
     spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: "RuntimeDefault"
       containers:
       - name: carts-db
-        image: centos/mongodb-34-centos7
+        image: mongo
         ports:
         - name: mongo
           containerPort: 27017
-        env:
-        - name: MONGODB_USER
-          value: sock-user
-        - name: MONGODB_PASSWORD
-          value: password
-        - name: MONGODB_DATABASE
-          value: data
-        - name: MONGODB_ADMIN_PASSWORD
-          value: admin
+        securityContext:
+          capabilities:
+            drop:
+              - all
+            add:
+              - CHOWN
+              - SETGID
+              - SETUID
+          readOnlyRootFilesystem: true
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
-          capabilities:
-            drop: ["ALL"]
       volumes:
         - name: tmp-volume
           emptyDir:
             medium: Memory
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -91,63 +132,67 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: carts
+  name: catalogue
   labels:
-    name: carts
+    name: catalogue
   namespace: sock-shop
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: carts
+      name: catalogue
   template:
     metadata:
       labels:
-        name: carts
+        name: catalogue
     spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: "RuntimeDefault"
       containers:
-      - name: carts
-        image: weaveworksdemos/carts:0.4.8
+      - name: catalogue
+        image: weaveworksdemos/catalogue:0.3.5
+        command: ["/app"]
+        args:
+        - -port=80
+        resources:
+          limits:
+            cpu: 200m
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
         ports:
-         - containerPort: 80
-        #startupProbe:
-        #  httpGet:
-        #    path: /
-        #    port: 80
-        #  failureThreshold: 30
-        #  periodSeconds: 10
-        env:
-         - name: ZIPKIN
-           value: zipkin
-         - name: JAVA_OPTS
-           value: -Xms64m -Xmx128m -XX:PermSize=32m -XX:MaxPermSize=64m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom
-         - name: db
-           value: sock-user:password@carts-db
-        volumeMounts:
-        - mountPath: /tmp
-          name: tmp-volume
+        - containerPort: 80
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+          runAsNonRoot: true
+          runAsUser: 10001
           capabilities:
-            drop: ["ALL"]
-      volumes:
-        - name: tmp-volume
-          emptyDir:
-            medium: Memory
+            drop:
+              - all
+            add:
+              - NET_BIND_SERVICE
+          readOnlyRootFilesystem: true
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 300
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 180
+          periodSeconds: 3
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: carts
+  name: catalogue
+  annotations:
+        prometheus.io/scrape: 'true'
   labels:
-    name: carts
+    name: catalogue
   namespace: sock-shop
 spec:
   ports:
@@ -155,7 +200,7 @@ spec:
   - port: 80
     targetPort: 80
   selector:
-    name: carts
+    name: catalogue
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -174,36 +219,19 @@ spec:
       labels:
         name: catalogue-db
     spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: "RuntimeDefault"
       containers:
       - name: catalogue-db
-        image: mosuke5/sockshop-catalogue-db@sha256:e9c9192a81991ab1acf2dcc5819f0b0eb513d04e80fa21ae1b869bc5ba810c40
+        image: weaveworksdemos/catalogue-db:0.3.0
         env:
-          - name: MYSQL_USER
-            value: catalogue_user
-          - name: MYSQL_PASSWORD
-            value: default_password
-          - name: MYSQL_DATABASE
-            value: socksdb
           - name: MYSQL_ROOT_PASSWORD
             value: fake_password
-          - name: MYSQL_OPERATIONS_USER
-            value: opuser
-          - name: MYSQL_OPERATIONS_PASSWORD
-            value: opuser_password
+          - name: MYSQL_DATABASE
+            value: socksdb
         ports:
         - name: mysql
           containerPort: 3306
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
-          capabilities:
-            drop: ["ALL"]
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -223,62 +251,6 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: catalogue
-  labels:
-    name: catalogue
-  namespace: sock-shop
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: catalogue
-  template:
-    metadata:
-      labels:
-        name: catalogue
-    spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: "RuntimeDefault"
-      containers:
-      - name: catalogue
-        image: mosuke5/sockshop-catalogue:a04de03
-        #image: weaveworksdemos/catalogue:0.3.5
-        #env:
-        #- name: ZIPKIN
-        #  value: http://zipkin:9411/api/v1/spans
-        ports:
-        - containerPort: 80
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
-          capabilities:
-            drop: 
-              - all
-            add:
-              - NET_BIND_SERVICE
-      nodeSelector:
-        kubernetes.io/os: linux
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: catalogue
-  labels:
-    name: catalogue
-  namespace: sock-shop
-spec:
-  ports:
-    # the port that this service should serve on
-  - port: 80
-    targetPort: 80
-  selector:
-    name: catalogue
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: front-end
   namespace: sock-shop
 spec:
@@ -290,57 +262,129 @@ spec:
     metadata:
       labels:
         name: front-end
-        version: v1
     spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: "RuntimeDefault"
       containers:
       - name: front-end
-        image: mosuke5/front-end:master-7ad6254
+        image: weaveworksdemos/front-end:0.3.12
+        resources:
+          limits:
+            cpu: 300m
+            memory: 1000Mi
+          requests:
+            cpu: 100m
+            memory: 300Mi
         ports:
         - containerPort: 8079
+        env:
+        - name: SESSION_REDIS
+          value: "true"
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+          runAsNonRoot: true
+          runAsUser: 10001
           capabilities:
-            drop: ["ALL"]
+            drop:
+              - all
+          readOnlyRootFilesystem: true
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8079
+          initialDelaySeconds: 300
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8079
+          initialDelaySeconds: 30
+          periodSeconds: 3
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: front-end
+  annotations:
+        prometheus.io/scrape: 'true'
   labels:
     name: front-end
   namespace: sock-shop
 spec:
-  type: ClusterIP
+  type: NodePort
   ports:
-    - name: web
-      port: 80
-      targetPort: 8079
-      protocol: TCP
+  - port: 80
+    targetPort: 8079
+    nodePort: 30001
   selector:
     name: front-end
 ---
-apiVersion: route.openshift.io/v1
-kind: Route
+apiVersion: apps/v1
+kind: Deployment
 metadata:
+  name: orders
   labels:
-    name: front-end
-  name: front-end
+    name: orders
   namespace: sock-shop
 spec:
-  port:
-    targetPort: web
-  to:
-    kind: Service
-    name: front-end
-    weight: 100
-  wildcardPolicy: None
+  replicas: 1
+  selector:
+    matchLabels:
+      name: orders
+  template:
+    metadata:
+      labels:
+        name: orders
+    spec:
+      containers:
+      - name: orders
+        image: weaveworksdemos/orders:0.4.7
+        env:
+         - name: JAVA_OPTS
+           value: -Xms64m -Xmx128m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom -Dspring.zipkin.enabled=false
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 300Mi
+        ports:
+        - containerPort: 80
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 10001
+          capabilities:
+            drop:
+              - all
+            add:
+              - NET_BIND_SERVICE
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp-volume
+      volumes:
+        - name: tmp-volume
+          emptyDir:
+            medium: Memory
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders
+  annotations:
+        prometheus.io/scrape: 'true'
+  labels:
+    name: orders
+  namespace: sock-shop
+spec:
+  ports:
+    # the port that this service should serve on
+  - port: 80
+    targetPort: 80
+  selector:
+    name: orders
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -359,39 +403,30 @@ spec:
       labels:
         name: orders-db
     spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: "RuntimeDefault"
       containers:
       - name: orders-db
-        image: centos/mongodb-34-centos7
+        image: mongo
         ports:
         - name: mongo
           containerPort: 27017
-        env:
-        - name: MONGODB_USER
-          value: sock-user
-        - name: MONGODB_PASSWORD
-          value: password
-        - name: MONGODB_DATABASE
-          value: data
-        - name: MONGODB_ADMIN_PASSWORD
-          value: admin
+        securityContext:
+          capabilities:
+            drop:
+              - all
+            add:
+              - CHOWN
+              - SETGID
+              - SETUID
+          readOnlyRootFilesystem: true
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
-          capabilities:
-            drop: ["ALL"]
       volumes:
         - name: tmp-volume
           emptyDir:
             medium: Memory
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -411,69 +446,6 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: orders
-  labels:
-    name: orders
-  namespace: sock-shop
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: orders
-  template:
-    metadata:
-      labels:
-        name: orders
-    spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: "RuntimeDefault"
-      containers:
-      - name: orders
-        image: weaveworksdemos/orders:0.4.7
-        env:
-         - name: ZIPKIN
-           value: zipkin
-         - name: JAVA_OPTS
-           value: -Xms64m -Xmx128m -XX:PermSize=32m -XX:MaxPermSize=64m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom
-         - name: db
-           value: sock-user:password@orders-db
-        ports:
-        - containerPort: 80
-        volumeMounts:
-        - mountPath: /tmp
-          name: tmp-volume
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
-          capabilities:
-            drop: ["ALL"]
-      volumes:
-        - name: tmp-volume
-          emptyDir:
-            medium: Memory
-      nodeSelector:
-        kubernetes.io/os: linux
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: orders
-  labels:
-    name: orders
-  namespace: sock-shop
-spec:
-  ports:
-    # the port that this service should serve on
-  - port: 80
-    targetPort: 80
-  selector:
-    name: orders
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: payment
   labels:
     name: payment
@@ -488,30 +460,48 @@ spec:
       labels:
         name: payment
     spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: "RuntimeDefault"
       containers:
       - name: payment
         image: weaveworksdemos/payment:0.4.3
-        env:
-        - name: ZIPKIN
-          value: http://zipkin:9411/api/v1/spans
+        resources:
+          limits:
+            cpu: 200m
+            memory: 200Mi
+          requests:
+            cpu: 99m
+            memory: 100Mi
         ports:
         - containerPort: 80
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+          runAsNonRoot: true
+          runAsUser: 10001
           capabilities:
-            drop: ["ALL"]
+            drop:
+              - all
+            add:
+              - NET_BIND_SERVICE
+          readOnlyRootFilesystem: true
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 300
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 180
+          periodSeconds: 3
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: payment
+  annotations:
+        prometheus.io/scrape: 'true'
   labels:
     name: payment
   namespace: sock-shop
@@ -540,31 +530,32 @@ spec:
       labels:
         name: queue-master
     spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: "RuntimeDefault"
       containers:
       - name: queue-master
         image: weaveworksdemos/queue-master:0.3.1
+        env:
+         - name: JAVA_OPTS
+           value: -Xms64m -Xmx128m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom -Dspring.zipkin.enabled=false
+        resources:
+          limits:
+            cpu: 300m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 300Mi
         ports:
         - containerPort: 80
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
-          capabilities:
-            drop: ["ALL"]
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: queue-master
+  annotations:
+        prometheus.io/scrape: 'true'
   labels:
     name: queue-master
-  annotations:
-    prometheus.io/path: "/prometheus"
   namespace: sock-shop
 spec:
   ports:
@@ -590,28 +581,42 @@ spec:
     metadata:
       labels:
         name: rabbitmq
+      annotations:
+        prometheus.io/scrape: "false"
     spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: "RuntimeDefault"
       containers:
       - name: rabbitmq
-        image: rabbitmq:3.6.8
+        image: rabbitmq:3.6.8-management
         ports:
+        - containerPort: 15672
+          name: management
         - containerPort: 5672
+          name: rabbitmq
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
           capabilities:
-            drop: ["ALL"]
+            drop:
+              - all
+            add:
+              - CHOWN
+              - SETGID
+              - SETUID
+              - DAC_OVERRIDE
+          readOnlyRootFilesystem: true
+      - name: rabbitmq-exporter
+        image: kbudde/rabbitmq-exporter
+        ports:
+        - containerPort: 9090
+          name: exporter
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: rabbitmq
+  annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9090'
   labels:
     name: rabbitmq
   namespace: sock-shop
@@ -619,12 +624,66 @@ spec:
   ports:
     # the port that this service should serve on
   - port: 5672
+    name: rabbitmq
     targetPort: 5672
-    name: "amq"
-  - port: 4369
-    name: "epmd"
+  - port: 9090
+    name: exporter
+    targetPort: exporter
+    protocol: TCP
   selector:
     name: rabbitmq
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: session-db
+  labels:
+    name: session-db
+  namespace: sock-shop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: session-db
+  template:
+    metadata:
+      labels:
+        name: session-db
+      annotations:
+        prometheus.io.scrape: "false"
+    spec:
+      containers:
+      - name: session-db
+        image: redis:alpine
+        ports:
+        - name: redis
+          containerPort: 6379
+        securityContext:
+          capabilities:
+            drop:
+              - all
+            add:
+              - CHOWN
+              - SETGID
+              - SETUID
+          readOnlyRootFilesystem: true
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: session-db
+  labels:
+    name: session-db
+  namespace: sock-shop
+spec:
+  ports:
+    # the port that this service should serve on
+  - port: 6379
+    targetPort: 6379
+  selector:
+    name: session-db
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -643,39 +702,48 @@ spec:
       labels:
         name: shipping
     spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: "RuntimeDefault"
       containers:
       - name: shipping
         image: weaveworksdemos/shipping:0.4.8
         env:
          - name: ZIPKIN
-           value: zipkin
+           value: zipkin.jaeger.svc.cluster.local
          - name: JAVA_OPTS
-           value: -Xms64m -Xmx128m -XX:PermSize=32m -XX:MaxPermSize=64m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom
+           value: -Xms64m -Xmx128m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom -Dspring.zipkin.enabled=false
+        resources:
+          limits:
+            cpu: 300m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 300Mi
         ports:
         - containerPort: 80
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 10001
+          capabilities:
+            drop:
+              - all
+            add:
+              - NET_BIND_SERVICE
+          readOnlyRootFilesystem: true
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
-          capabilities:
-            drop: ["ALL"]
       volumes:
         - name: tmp-volume
           emptyDir:
             medium: Memory
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: shipping
+  annotations:
+        prometheus.io/scrape: 'true'
   labels:
     name: shipping
   namespace: sock-shop
@@ -686,77 +754,7 @@ spec:
     targetPort: 80
   selector:
     name: shipping
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: user-db
-  labels:
-    name: user-db
-  namespace: sock-shop
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: user-db
-  template:
-    metadata:
-      labels:
-        name: user-db
-    spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: "RuntimeDefault"
-      containers:
-      - name: user-db
-        image: mosuke5/sockshop-user-db@sha256:7633a123fe2a1e6191fd37cad6d4f07bfb2acdc3a634e27c226df3ae21357da0
-        #image: centos/mongodb-34-centos7
-        ports:
-        - name: mongo
-          containerPort: 27017
-        env:
-        - name: MONGODB_USER
-          value: sock-user
-        - name: MONGODB_PASSWORD
-          value: password
-        - name: MONGODB_DATABASE
-          value: users
-        - name: MONGODB_ADMIN_PASSWORD
-          value: admin
-        - name: MONGODB_BACKUP_USER
-          value: bkuser
-        - name: MONGODB_BACKUP_PASSWORD
-          value: password
-        volumeMounts:
-        - mountPath: /tmp
-          name: tmp-volume
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
-          capabilities:
-            drop: ["ALL"]
-      volumes:
-        - name: tmp-volume
-          emptyDir:
-            medium: Memory
-      nodeSelector:
-        kubernetes.io/os: linux
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: user-db
-  labels:
-    name: user-db
-  namespace: sock-shop
-spec:
-  ports:
-    # the port that this service should serve on
-  - port: 27017
-    targetPort: 27017
-  selector:
-    name: user-db
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -775,36 +773,51 @@ spec:
       labels:
         name: user
     spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: "RuntimeDefault"
       containers:
       - name: user
         image: weaveworksdemos/user:0.4.7
+        resources:
+          limits:
+            cpu: 300m
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
         ports:
         - containerPort: 80
         env:
-        - name: MONGO_USER
-          value: sock-user
-        - name: MONGO_PASS
-          value: password
-        - name: MONGO_HOST
+        - name: mongo
           value: user-db:27017
-        - name: ZIPKIN
-          value: http://zipkin:9411/api/v1/spans
         securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+          runAsNonRoot: true
+          runAsUser: 10001
           capabilities:
-            drop: ["ALL"]
+            drop:
+              - all
+            add:
+              - NET_BIND_SERVICE
+          readOnlyRootFilesystem: true
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 300
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 180
+          periodSeconds: 3
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: user
+  annotations:
+        prometheus.io/scrape: 'true'
   labels:
     name: user
   namespace: sock-shop
@@ -815,3 +828,62 @@ spec:
     targetPort: 80
   selector:
     name: user
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-db
+  labels:
+    name: user-db
+  namespace: sock-shop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: user-db
+  template:
+    metadata:
+      labels:
+        name: user-db
+    spec:
+      containers:
+      - name: user-db
+        image: weaveworksdemos/user-db:0.3.0
+
+        ports:
+        - name: mongo
+          containerPort: 27017
+        securityContext:
+          capabilities:
+            drop:
+              - all
+            add:
+              - CHOWN
+              - SETGID
+              - SETUID
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp-volume
+      volumes:
+        - name: tmp-volume
+          emptyDir:
+            medium: Memory
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-db
+  labels:
+    name: user-db
+  namespace: sock-shop
+spec:
+  ports:
+    # the port that this service should serve on
+  - port: 27017
+    targetPort: 27017
+  selector:
+    name: user-db
