@@ -1,0 +1,9 @@
+ kind: SecurityContextConstraints
+ apiVersion: v1
+ metadata:
+   name: socks-shop-scc
+ allowPrivilegedContainer: false
+ runAsUser:
+   type: RunAsAny
+ seLinuxContext:
+   type: RunAsAny
