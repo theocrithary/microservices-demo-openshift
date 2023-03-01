@@ -73,6 +73,20 @@ spec:
   selector:
     name: carts
 ---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: carts-db
+  namespace: sock-shop
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "eqx-powerflex-sc"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -106,9 +120,14 @@ spec:
               - SETUID
           readOnlyRootFilesystem: true
         volumeMounts:
+        - mountPath: /data/db
+          name: mongo-persistent-storage
         - mountPath: /tmp
           name: tmp-volume
       volumes:
+          - name: mongo-persistent-storage
+          persistentVolumeClaim:
+            claimName: carts-db
         - name: tmp-volume
           emptyDir:
             medium: Memory
