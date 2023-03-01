@@ -21,9 +21,6 @@ spec:
       labels:
         name: carts
     spec:
-      securityContext:
-        seccompProfile:
-          type: "RuntimeDefault"
       containers:
       - name: carts
         image: weaveworksdemos/carts:0.4.8
@@ -41,7 +38,7 @@ spec:
         - containerPort: 80
         securityContext:
           runAsNonRoot: true
-          allowPrivilegeEscalation: false
+          runAsUser: 10001
           capabilities:
             drop:
               - all
@@ -56,7 +53,7 @@ spec:
           emptyDir:
             medium: Memory
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -74,20 +71,6 @@ spec:
     targetPort: 80
   selector:
     name: carts
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: carts-db
-  namespace: sock-shop
-  annotations:
-    volume.beta.kubernetes.io/storage-class: "eqx-powerflex-sc"
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 8Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -116,21 +99,20 @@ spec:
           capabilities:
             drop:
               - all
+            add:
+              - CHOWN
+              - SETGID
+              - SETUID
           readOnlyRootFilesystem: true
         volumeMounts:
-        - name: mongo-persistent-storage
-          mountPath: /data/db
         - mountPath: /tmp
           name: tmp-volume
       volumes:
-        - name: mongo-persistent-storage
-          persistentVolumeClaim:
-            claimName: carts-db
         - name: tmp-volume
           emptyDir:
             medium: Memory
-        nodeSelector:
-        kubernetes.io/os: linux
+      nodeSelector:
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -181,6 +163,7 @@ spec:
         - containerPort: 80
         securityContext:
           runAsNonRoot: true
+          runAsUser: 10001
           capabilities:
             drop:
               - all
@@ -200,7 +183,7 @@ spec:
           initialDelaySeconds: 180
           periodSeconds: 3
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -248,7 +231,7 @@ spec:
         - name: mysql
           containerPort: 3306
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -297,6 +280,7 @@ spec:
           value: "true"
         securityContext:
           runAsNonRoot: true
+          runAsUser: 10001
           capabilities:
             drop:
               - all
@@ -314,7 +298,7 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 3
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -368,6 +352,7 @@ spec:
         - containerPort: 80
         securityContext:
           runAsNonRoot: true
+          runAsUser: 10001
           capabilities:
             drop:
               - all
@@ -382,7 +367,7 @@ spec:
           emptyDir:
             medium: Memory
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -441,7 +426,7 @@ spec:
           emptyDir:
             medium: Memory
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -489,6 +474,7 @@ spec:
         - containerPort: 80
         securityContext:
           runAsNonRoot: true
+          runAsUser: 10001
           capabilities:
             drop:
               - all
@@ -508,7 +494,7 @@ spec:
           initialDelaySeconds: 180
           periodSeconds: 3
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -560,7 +546,7 @@ spec:
         ports:
         - containerPort: 80
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -622,7 +608,7 @@ spec:
         - containerPort: 9090
           name: exporter
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -682,7 +668,7 @@ spec:
               - SETUID
           readOnlyRootFilesystem: true
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -735,6 +721,7 @@ spec:
         - containerPort: 80
         securityContext:
           runAsNonRoot: true
+          runAsUser: 10001
           capabilities:
             drop:
               - all
@@ -749,7 +736,7 @@ spec:
           emptyDir:
             medium: Memory
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -803,6 +790,7 @@ spec:
           value: user-db:27017
         securityContext:
           runAsNonRoot: true
+          runAsUser: 10001
           capabilities:
             drop:
               - all
@@ -822,7 +810,7 @@ spec:
           initialDelaySeconds: 180
           periodSeconds: 3
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
@@ -883,7 +871,7 @@ spec:
           emptyDir:
             medium: Memory
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: v1
 kind: Service
