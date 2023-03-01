@@ -8,6 +8,7 @@ apiVersion: v1
 kind: SecurityContextConstraints
 metadata:
   name: sock-shop-scc
+  namespace: sock-shop
 allowPrivilegedContainer: false
 runAsUser:
   type: RunAsAny
