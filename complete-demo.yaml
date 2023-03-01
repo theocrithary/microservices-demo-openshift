@@ -216,6 +216,20 @@ spec:
   selector:
     name: catalogue
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: catalogue-db-pvc
+  namespace: sock-shop
+spec:
+  accessModes:
+  - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: eqx-powerflex-sc
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -244,6 +258,13 @@ spec:
         ports:
         - name: mysql
           containerPort: 3306
+        volumeMounts:
+        - mountPath: "/var/lib/mysql"
+          name: mysql-storage
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: catalogue-db-pvc
       nodeSelector:
         kubernetes.io/os: linux
 ---
