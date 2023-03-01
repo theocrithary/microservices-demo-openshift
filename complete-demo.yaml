@@ -228,7 +228,7 @@ spec:
   resources:
     requests:
       storage: 8Gi
-  storageClassName: eqx-powerflex-sc
+  storageClassName: eqx-powerscale-sc
 ---
 apiVersion: apps/v1
 kind: Deployment
