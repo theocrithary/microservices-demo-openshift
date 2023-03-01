@@ -76,7 +76,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: carts-db
+  name: carts-db-pvc
   namespace: sock-shop
 spec:
   accessModes:
@@ -127,7 +127,7 @@ spec:
       volumes:
         - name: mongo-persistent-storage
           persistentVolumeClaim:
-            claimName: carts-db
+            claimName: carts-db-pvc
         - name: tmp-volume
           emptyDir:
             medium: Memory
