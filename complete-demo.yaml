@@ -112,12 +112,7 @@ spec:
           containerPort: 27017
         securityContext:
           capabilities:
-            drop:
-              - all
-            add:
-              - CHOWN
-              - SETGID
-              - SETUID
+            drop: ["ALL"]
           readOnlyRootFilesystem: true
         volumeMounts:
         - mountPath: /tmp
