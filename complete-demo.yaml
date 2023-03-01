@@ -73,6 +73,20 @@ spec:
   selector:
     name: carts
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: carts-db
+  namespace: sock-shop
+spec:
+  accessModes:
+  - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: eqx-powerflex-sc
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -108,7 +122,12 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
+        - mountPath: /data/db
+          name: carts-db
       volumes:
+        - name: mongo-persistent-storage
+          persistentVolumeClaim:
+            claimName: carts-db
         - name: tmp-volume
           emptyDir:
             medium: Memory
