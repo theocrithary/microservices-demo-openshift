@@ -25,6 +25,7 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: sock-shop-role
+  namespace: sock-shop
 rules:
   - apiGroups: ["security.openshift.io"]
     resources: ["securitycontextconstraints"]
@@ -35,6 +36,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: sock-shop-scc-rolebinding
+  namespace: sock-shop
 subjects:
   - kind: ServiceAccount
     name: sock-shop-sa
