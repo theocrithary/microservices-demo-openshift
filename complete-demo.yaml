@@ -123,7 +123,7 @@ spec:
         - mountPath: /tmp
           name: tmp-volume
         - mountPath: /data/db
-          name: carts-db
+          name: mongo-persistent-storage
       volumes:
         - name: mongo-persistent-storage
           persistentVolumeClaim:
