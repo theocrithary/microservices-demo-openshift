@@ -25,7 +25,6 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: sock-shop-role
-  namespace: sock-shop
 rules:
   - apiGroups: ["security.openshift.io"]
     resources: ["securitycontextconstraints"]
