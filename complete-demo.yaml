@@ -4,7 +4,7 @@ kind: Namespace
 metadata:
   name: sock-shop
 ---
-apiVersion: v1
+apiVersion: security.openshift.io/v1
 kind: SecurityContextConstraints
 metadata:
   name: sock-shop-scc
@@ -13,6 +13,8 @@ runAsUser:
   type: RunAsAny
 seLinuxContext:
   type: RunAsAny
+seccompProfiles:
+- '*'
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -78,8 +80,6 @@ spec:
         - containerPort: 80
         serviceAccountName: socks-shop-sa
         securityContext:
-          seccompProfile:
-            type: "RuntimeDefault"
           runAsNonRoot: true
           runAsUser: 10001
           capabilities:
