@@ -1,51 +1,4 @@
 ---
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: sock-shop
----
-apiVersion: security.openshift.io/v1
-kind: SecurityContextConstraints
-metadata:
-  name: sock-shop-scc
-allowPrivilegedContainer: false
-runAsUser:
-  type: RunAsAny
-seLinuxContext:
-  type: RunAsAny
-seccompProfiles:
-- '*'
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: sock-shop-sa
-  namespace: sock-shop
----
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: sock-shop-role
-  namespace: sock-shop
-rules:
-  - apiGroups: ["security.openshift.io"]
-    resources: ["securitycontextconstraints"]
-    resourceNames: ["sock-shop-scc"]
-    verbs: ["use"]
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: sock-shop-scc-rolebinding
-  namespace: sock-shop
-subjects:
-  - kind: ServiceAccount
-    name: sock-shop-sa
-roleRef:
-  kind: Role
-  name: sock-shop-role
-  apiGroup: rbac.authorization.k8s.io
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -79,7 +32,6 @@ spec:
         ports:
         - containerPort: 80
         securityContext:
-          runAsNonRoot: true
           runAsUser: 10001
           capabilities:
             drop:
