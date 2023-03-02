@@ -79,6 +79,7 @@ spec:
             memory: 200Mi
         ports:
         - containerPort: 80
+        serviceAccountName: sock-shop-sa
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
