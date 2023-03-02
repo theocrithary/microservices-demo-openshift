@@ -78,7 +78,7 @@ spec:
             memory: 200Mi
         ports:
         - containerPort: 80
-        serviceAccountName: socks-shop-sa
+        serviceAccountName: sock-shop-sa
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
@@ -223,7 +223,7 @@ spec:
             memory: 100Mi
         ports:
         - containerPort: 80
-        serviceAccountName: socks-shop-sa
+        serviceAccountName: sock-shop-sa
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
@@ -362,7 +362,7 @@ spec:
         env:
         - name: SESSION_REDIS
           value: "true"
-        serviceAccountName: socks-shop-sa
+        serviceAccountName: sock-shop-sa
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
@@ -435,7 +435,7 @@ spec:
             memory: 300Mi
         ports:
         - containerPort: 80
-        serviceAccountName: socks-shop-sa
+        serviceAccountName: sock-shop-sa
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
@@ -558,7 +558,7 @@ spec:
             memory: 100Mi
         ports:
         - containerPort: 80
-        serviceAccountName: socks-shop-sa
+        serviceAccountName: sock-shop-sa
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
@@ -806,7 +806,7 @@ spec:
             memory: 300Mi
         ports:
         - containerPort: 80
-        serviceAccountName: socks-shop-sa
+        serviceAccountName: sock-shop-sa
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
@@ -876,7 +876,7 @@ spec:
         env:
         - name: mongo
           value: user-db:27017
-        serviceAccountName: socks-shop-sa
+        serviceAccountName: sock-shop-sa
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
