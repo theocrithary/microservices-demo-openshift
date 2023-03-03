@@ -279,7 +279,7 @@ spec:
   resources:
     requests:
       storage: 8Gi
-  storageClassName: eqx-powerscale-sc
+  storageClassName: eqx-powerflex-sc
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -474,6 +474,20 @@ spec:
   selector:
     name: orders
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: orders-db-pvc
+  namespace: sock-shop
+spec:
+  accessModes:
+  - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: eqx-powerflex-sc
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -507,10 +521,15 @@ spec:
               - SETUID
           readOnlyRootFilesystem: true
         volumeMounts:
+        - name: mongo-persistent-storage
+          mountPath: /data/db
         - mountPath: /tmp
           name: tmp-volume
       serviceAccountName: sock-shop-sa
       volumes:
+        - name: mongo-persistent-storage
+          persistentVolumeClaim:
+            claimName: orders-db-pvc
         - name: tmp-volume
           emptyDir:
             medium: Memory
