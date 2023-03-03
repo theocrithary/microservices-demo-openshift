@@ -30,7 +30,6 @@ spec:
             memory: 200Mi
         ports:
         - containerPort: 80
-        serviceAccountName: sock-shop-sa
         securityContext:
           runAsUser: 10001
           capabilities:
@@ -42,6 +41,7 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
+      serviceAccountName: sock-shop-sa
       volumes:
         - name: tmp-volume
           emptyDir:
