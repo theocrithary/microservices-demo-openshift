@@ -21,7 +21,7 @@
          volumeMounts:
          - mountPath: /var/opt/app/data
            name: data
-       serviceAccountName: scc-tutorial-sa
+       serviceAccountName: sock-shop-sa
        securityContext:
          fsGroup: 5555
          supplementalGroups: [5777, 5888]
