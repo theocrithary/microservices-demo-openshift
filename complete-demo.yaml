@@ -674,6 +674,20 @@ spec:
   selector:
     name: queue-master
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rabbitmq-pvc
+  namespace: sock-shop
+spec:
+  accessModes:
+  - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: eqx-powerflex-sc
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -716,6 +730,13 @@ spec:
         ports:
         - containerPort: 9090
           name: exporter
+        volumeMounts:
+        - name: rabbitmq-data
+          mountPath: /var/lib/rabbitmq
+      volumes:
+        - name: rabbitmq-data
+          persistentVolumeClaim:
+            claimName: rabbitmq-pvc
       serviceAccountName: sock-shop-sa
       nodeSelector:
         kubernetes.io/os: linux
