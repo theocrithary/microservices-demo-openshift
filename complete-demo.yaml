@@ -167,6 +167,7 @@ spec:
           name: tmp-volume
         - mountPath: /data/db
           name: mongo-persistent-storage
+      serviceAccountName: sock-shop-sa
       volumes:
         - name: mongo-persistent-storage
           persistentVolumeClaim:
@@ -224,7 +225,6 @@ spec:
             memory: 100Mi
         ports:
         - containerPort: 80
-        serviceAccountName: sock-shop-sa
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
@@ -246,6 +246,7 @@ spec:
             port: 80
           initialDelaySeconds: 180
           periodSeconds: 3
+      serviceAccountName: sock-shop-sa
       nodeSelector:
         kubernetes.io/os: linux
 ---
@@ -363,7 +364,6 @@ spec:
         env:
         - name: SESSION_REDIS
           value: "true"
-        serviceAccountName: sock-shop-sa
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
@@ -383,6 +383,7 @@ spec:
             port: 8079
           initialDelaySeconds: 30
           periodSeconds: 3
+      serviceAccountName: sock-shop-sa
       nodeSelector:
         kubernetes.io/os: linux
 ---
@@ -436,7 +437,6 @@ spec:
             memory: 300Mi
         ports:
         - containerPort: 80
-        serviceAccountName: sock-shop-sa
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
@@ -449,6 +449,7 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
+      serviceAccountName: sock-shop-sa
       volumes:
         - name: tmp-volume
           emptyDir:
@@ -508,6 +509,7 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
+      serviceAccountName: sock-shop-sa
       volumes:
         - name: tmp-volume
           emptyDir:
@@ -559,7 +561,6 @@ spec:
             memory: 100Mi
         ports:
         - containerPort: 80
-        serviceAccountName: sock-shop-sa
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
@@ -581,6 +582,7 @@ spec:
             port: 80
           initialDelaySeconds: 180
           periodSeconds: 3
+      serviceAccountName: sock-shop-sa
       nodeSelector:
         kubernetes.io/os: linux
 ---
@@ -695,6 +697,7 @@ spec:
         ports:
         - containerPort: 9090
           name: exporter
+      serviceAccountName: sock-shop-sa
       nodeSelector:
         kubernetes.io/os: linux
 ---
@@ -755,6 +758,7 @@ spec:
               - SETGID
               - SETUID
           readOnlyRootFilesystem: true
+      serviceAccountName: sock-shop-sa
       nodeSelector:
         kubernetes.io/os: linux
 ---
@@ -807,7 +811,6 @@ spec:
             memory: 300Mi
         ports:
         - containerPort: 80
-        serviceAccountName: sock-shop-sa
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
@@ -820,6 +823,7 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
+      serviceAccountName: sock-shop-sa
       volumes:
         - name: tmp-volume
           emptyDir:
@@ -877,7 +881,6 @@ spec:
         env:
         - name: mongo
           value: user-db:27017
-        serviceAccountName: sock-shop-sa
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
@@ -899,6 +902,7 @@ spec:
             port: 80
           initialDelaySeconds: 180
           periodSeconds: 3
+      serviceAccountName: sock-shop-sa
       nodeSelector:
         kubernetes.io/os: linux
 ---
@@ -956,6 +960,7 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
+      serviceAccountName: sock-shop-sa
       volumes:
         - name: tmp-volume
           emptyDir:
