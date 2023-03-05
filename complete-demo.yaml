@@ -8,7 +8,7 @@ apiVersion: security.openshift.io/v1
 kind: SecurityContextConstraints
 metadata:
   name: sock-shop-scc
-allowPrivilegedContainer: false
+allowPrivilegedContainer: true
 runAsUser:
   type: RunAsAny
 seLinuxContext:
