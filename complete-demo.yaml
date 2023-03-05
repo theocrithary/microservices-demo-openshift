@@ -1017,7 +1017,7 @@ spec:
         - mountPath: /tmp
           name: tmp-volume
         - name: mongo-persistent-storage
-          mountPath: /data/db
+          mountPath: /data
       serviceAccountName: sock-shop-sa
       volumes:
         - name: mongo-persistent-storage
