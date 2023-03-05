@@ -966,6 +966,20 @@ spec:
     name: user
 
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: user-db-pvc
+  namespace: sock-shop
+spec:
+  accessModes:
+  - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: eqx-powerflex-sc
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -1002,8 +1016,13 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-volume
+        - name: mongo-persistent-storage
+          mountPath: /data/db
       serviceAccountName: sock-shop-sa
       volumes:
+        - name: mongo-persistent-storage
+          persistentVolumeClaim:
+            claimName: user-db-pvc
         - name: tmp-volume
           emptyDir:
             medium: Memory
