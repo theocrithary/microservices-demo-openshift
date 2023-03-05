@@ -1032,6 +1032,8 @@ spec:
           name: tmp-volume
         - name: mongo-persistent-storage
           mountPath: /data/db
+        - name: mongo-condif-persistent-storage
+          mountPath: /data/configdb
       serviceAccountName: sock-shop-sa
       volumes:
         - name: mongo-persistent-storage
