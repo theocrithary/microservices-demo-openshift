@@ -301,6 +301,8 @@ spec:
       containers:
       - name: catalogue-db
         image: weaveworksdemos/catalogue-db:0.3.0
+        args:
+          - "--ignore-db-dir=lost+found"
         env:
           - name: MYSQL_ROOT_PASSWORD
             value: fake_password
