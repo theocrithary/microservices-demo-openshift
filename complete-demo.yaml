@@ -1014,8 +1014,6 @@ spec:
       containers:
       - name: user-db
         image: weaveworksdemos/user-db:0.3.0
-        args:
-          - "--ignore-db-dir=lost+found"
         ports:
         - name: mongo
           containerPort: 27017
