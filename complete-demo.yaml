@@ -727,14 +727,14 @@ spec:
               - SETUID
               - DAC_OVERRIDE
           readOnlyRootFilesystem: true
+        volumeMounts:
+        - name: rabbitmq-data
+          mountPath: /var/lib/rabbitmq
       - name: rabbitmq-exporter
         image: kbudde/rabbitmq-exporter
         ports:
         - containerPort: 9090
           name: exporter
-        volumeMounts:
-        - name: rabbitmq-data
-          mountPath: /var/lib/rabbitmq
       volumes:
         - name: rabbitmq-data
           persistentVolumeClaim:
