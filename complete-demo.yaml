@@ -420,7 +420,7 @@ spec:
     kind: Service
     name: front-end
   port:
-    targetPort: 80
+    targetPort: 8079
 ---
 apiVersion: apps/v1
 kind: Deployment
